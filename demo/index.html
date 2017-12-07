@@ -33,19 +33,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <h4>Standard</h4>
     <div class="vertical-section">
       <gold-cc-expiration-input></gold-cc-expiration-input>
-      <gold-cc-expiration-input label="Auto-validating" auto-validate required></gold-cc-expiration-input>
+      <gold-cc-expiration-input value="07/20"></gold-cc-expiration-input>
     </div>
 
     <h4>Pre-validated</h4>
     <div class="vertical-section">
-      <gold-cc-expiration-input auto-validate value="11/15"></gold-cc-expiration-input>
+      <gold-cc-expiration-input auto-validate value="11/20"></gold-cc-expiration-input>
       <gold-cc-expiration-input auto-validate value="31/23"></gold-cc-expiration-input>
       <gold-cc-expiration-input auto-validate value="11/"></gold-cc-expiration-input>
+      <gold-cc-expiration-input label="Required" required auto-validate></gold-cc-expiration-input>
     </div>
 
-    <h4>Custom error message, auto-validates on blur</h4>
+    <h4>Custom error message, validates on blur</h4>
     <div class="vertical-section">
-      <gold-cc-expiration-input required auto-validate error-message="Please enter a valid date" label="Credit Card Expiration"></gold-cc-expiration-input>
+      <gold-cc-expiration-input required error-message="Please enter a valid date" label="Credit Card Expiration"></gold-cc-expiration-input>
+      <gold-cc-expiration-input value="31/23" error-message="Please enter a valid date"></gold-cc-expiration-input>
     </div>
   </div>
 </body>

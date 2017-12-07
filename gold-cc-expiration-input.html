@@ -61,16 +61,20 @@ style this element.
 
     <paper-input-container id="container"
         no-label-float="[[noLabelFloat]]"
-        always-float-label="[[alwaysFloatLabel]]"
+        always-float-label
         attr-for-value="date"
         disabled$="[[disabled]]"
         invalid="[[invalid]]">
 
-      <label hidden$="[[!label]]">[[label]]</label>
+      <label slot="label" hidden$="[[!label]]">[[label]]</label>
 
       <date-input class="paper-input-input" id="input"
+          stop-date-event-propagation$="[[!_observeDateChange]]"
+          date="{{date}}"
+          slot="input"
           aria-label-prefix="[[_ariaLabelledBy]]"
           required$="[[required]]"
+          auto-validate="[[autoValidate]]"
           autocomplete$="[[autocomplete]]"
           disabled$="[[disabled]]"
           invalid="{{invalid}}"
@@ -81,7 +85,7 @@ style this element.
       </date-input>
 
       <template is="dom-if" if="[[errorMessage]]">
-        <paper-input-error>[[errorMessage]]</paper-input-error>
+        <paper-input-error slot="add-on">[[errorMessage]]</paper-input-error>
       </template>
 
     </paper-input-container>
@@ -93,11 +97,6 @@ style this element.
       Polymer({
 
         is: 'gold-cc-expiration-input',
-
-        /* The underlying dateInput is tabbable */
-        hostAttributes: {
-          'tabindex': -1
-        },
 
         behaviors: [
           Polymer.PaperInputBehavior,
@@ -113,56 +112,69 @@ style this element.
             value: "Expiration Date"
           },
 
+          /**
+           * The value as 'mm/yy'
+           */
           value: {
             type: String,
-            value: '',
-            observer: '_onValueChanged'
+            notify: true,
+            value: ''
+          },
+
+          /**
+           * The value as an object with a 'month' and 'year' property
+           */
+          date: {
+            type: Object,
+            notify: true,
+            observer: '_onDateChanged'
+          },
+
+          /**
+           * Composed date-input will not publish changes to its `date` property
+           * until `_observeDateChange` is true. This prevents the `date` property
+           * observer from incorrectly stepping-on the initial `value` property
+           */
+          _observeDateChange: {
+            type: Boolean,
+            value: false
           }
         },
 
-        listeners: {
-          'dateChanged': '_dateChanged'
-        },
-
         observers: [
-          '_onFocusedChanged(focused)'
+          '_onFocusedChanged(focused)',
+          '_onValueChanged(value, _observeDateChange)'
         ],
 
         ready: function() {
-          // If there's an initial input, validate it.
-          if (this.value)
-            this._handleAutoValidate();
+          this._observeDateChange = true;
+          /**
+           * PaperInputBehavior's tabindex=0 seems to cause problems
+           * the natural tabindex from date-input's native inputs should prevail
+           */
+          this.removeAttribute('tabindex');
         },
 
         /**
          * A handler that is called on input
          */
-        _onValueChanged: function(value, oldValue) {
-          // The initial property assignment is handled by `ready`.
-          if (oldValue == undefined)
-            return;
-
-          this.$.input.month = this._computeMonth(value);
-          this.$.input.year = this._computeYear(value);
-          this._handleAutoValidate();
+        _onValueChanged: function(value, ready) {
+          var parts = (value || '').split('/');
+          var input = this.$.input;
+          input.month = parts[0];
+          input.year = parts[1];
         },
 
-        _dateChanged: function(event) {
-          var month = event.detail.month || '';
-          var year = event.detail.year || '';
+        /**
+         * Handles Date change events published by `date-input` by updating the
+         * `value` property
+         */
+        _onDateChanged: function(d) {
+          d = d || {};
+          var month = d.month || '';
+          var year = d.year || '';
           var value = year ? (month + '/' + year) : month;
-
           this.value = String(value);
-        },
-
-        _computeMonth: function(value) {
-          // Date is in MM/YY format.
-          return value.split('/')[0];
-        },
-
-        _computeYear: function(value) {
-          // Date is in MM/YY format.
-          return value.split('/')[1] || '';
         },
 
         /**
@@ -176,15 +188,15 @@ style this element.
          * Overidden from Polymer.IronControlState.
          */
         _onFocusedChanged: function(focused) {
-          if (!focused) {
-            this._handleAutoValidate();
+          var previouslyFocused = this._previouslyFocused || false;
+          this._previouslyFocused = focused || previouslyFocused;
+          if (!focused && previouslyFocused) {
+            this.validate();
           }
         }
-          
       })
 
     })();
-
   </script>
 
 </dom-module>

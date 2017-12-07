@@ -13,11 +13,9 @@ thing! https://github.com/PolymerLabs/tedium/issues
 -->
 
 [![Build status](https://travis-ci.org/PolymerElements/gold-cc-expiration-input.svg?branch=master)](https://travis-ci.org/PolymerElements/gold-cc-expiration-input)
+[![Demo and API Docs](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/PolymerElements/gold-cc-expiration-input)
 
-_[Demo and API docs](https://elements.polymer-project.org/elements/gold-cc-expiration-input)_
-
-
-##&lt;gold-cc-expiration-input&gt;
+## &lt;gold-cc-expiration-input&gt;
 
 `gold-cc-expiration-input` is a  single-line text field with Material Design styling
 for entering a credit card's expiration date

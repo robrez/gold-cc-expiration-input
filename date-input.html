@@ -22,13 +22,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       span {
-        @apply(--paper-input-container-font);
+        @apply --paper-input-container-font;
         opacity: 0.33;
         text-align: center;
       }
 
-      input[is="iron-input"] {
-        position: relative; /* to make a stacking context */
+      input {
         outline: none;
         box-shadow: none;
         padding: 0;
@@ -38,13 +37,17 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: var(--paper-input-container-input-color, --primary-text-color);
         text-align: center;
 
-        @apply(--layout-flex);
-        @apply(--paper-font-subhead);
-        @apply(--paper-input-container-input);
+        @apply --layout-flex;
+        @apply --paper-font-subhead;
+        @apply --paper-input-container-input;
+      }
+
+      iron-input {
+        @apply --layout-flex;
       }
 
       .container {
-        @apply(--layout-horizontal);
+        @apply --layout-horizontal;
       }
     </style>
 
@@ -54,160 +57,309 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <span aria-hidden id="yearLabel" hidden>Year</span>
 
     <div class="container">
-      <input is="iron-input"
-          id="expirationMonth"
-          aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'monthLabel')]]"
-          required$="[[required]]"
-          maxlength="2"
-          bind-value="{{month}}"
-          placeholder="MM"
-          allowed-pattern="[0-9]"
-          prevent-invalid-input
-          autocomplete="cc-exp-month"
-          type="tel"
-          disabled$="[[disabled]]"
-          invalid="{{invalid}}"
-          autofocus$="[[autofocus]]"
-          inputmode$="[[inputmode]]"
-          readonly$="[[readonly]]">
-      <span>/</span>
-      <input is="iron-input"
-          id="expirationYear"
-          aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'yearLabel')]]"
-          required$="[[required]]"
-          maxlength="2"
-          bind-value="{{year}}"
-          placeholder="YY"
-          allowed-pattern="[0-9]"
-          prevent-invalid-input
-          autocomplete="cc-exp-year"
-          type="tel"
-          disabled$="[[disabled]]"
-          invalid="{{invalid}}"
-          inputmode$="[[inputmode]]"
-          readonly$="[[readonly]]">
+      <span id="template-placeholder"></span>
     </div>
   </template>
 
+  <template id="v0">
+    <input is="iron-input" id="expirationMonth"
+        on-input="_onInputMonth"
+        aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'monthLabel')]]"
+        required$="[[required]]"
+        maxlength="2"
+        bind-value="{{month}}"
+        placeholder="MM"
+        allowed-pattern="[0-9]"
+        prevent-invalid-input
+        autocomplete="cc-exp-month"
+        type="tel"
+        disabled$="[[disabled]]"
+        invalid="{{invalid}}"
+        autofocus$="[[autofocus]]"
+        inputmode$="[[inputmode]]"
+        readonly$="[[readonly]]">
+    <span>/</span>
+    <input is="iron-input" id="expirationYear"
+        on-input="_onInputYear"
+        aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'yearLabel')]]"
+        required$="[[required]]"
+        maxlength="2"
+        bind-value="{{year}}"
+        placeholder="YY"
+        allowed-pattern="[0-9]"
+        prevent-invalid-input
+        autocomplete="cc-exp-year"
+        type="tel"
+        disabled$="[[disabled]]"
+        invalid="{{invalid}}"
+        inputmode$="[[inputmode]]"
+        readonly$="[[readonly]]">
+  </template>
+
+  <template id="v1">
+    <iron-input
+        allowed-pattern="[0-9]"
+        bind-value="{{month}}"
+        invalid="{{invalid}}">
+      <input id="expirationMonth"
+          on-input="_onInputMonth"
+          aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'monthLabel')]]"
+          required$="[[required]]"
+          maxlength="2"
+          placeholder="MM"
+          autocomplete="cc-exp-month"
+          type="tel"
+          disabled$="[[disabled]]"
+          autofocus$="[[autofocus]]"
+          inputmode$="[[inputmode]]"
+          readonly$="[[readonly]]">
+    </iron-input>
+    <span>/</span>
+    <iron-input
+        allowed-pattern="[0-9]"
+        bind-value="{{year}}"
+        invalid="{{invalid}}">
+      <input id="expirationYear"
+          on-input="_onInputYear"
+          aria-labelledby$="[[_computeAriaLabel(ariaLabelPrefix,'yearLabel')]]"
+          required$="[[required]]"
+          maxlength="2"
+          placeholder="YY"
+          autocomplete="cc-exp-year"
+          type="tel"
+          disabled$="[[disabled]]"
+          inputmode$="[[inputmode]]"
+          readonly$="[[readonly]]">
+    </iron-input>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'date-input',
+
+      behaviors: [
+        Polymer.IronA11yKeysBehavior,
+        Polymer.IronValidatableBehavior
+      ],
+
+      properties: {
+        /**
+         * Set to true to mark the input as required.
+         */
+        required: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to true to auto-validate the input value.
+         */
+        autoValidate: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * The month component of the date displayed.
+         */
+        month: {
+          type: String
+        },
+
+        /**
+         * The year component of the date displayed.
+         */
+        year: {
+          type: String
+        },
+
+        /**
+         * The date object used by the validator. Has two properties, month and year.
+         * `gold-cc-expiration-input` also uses the Object to update its value
+         */
+        date: {
+          notify: true,
+          type: Object
+        },
+
+        /**
+         * Overriden from IronValidatableBehavior
+         */
+        validator: {
+          type: String,
+          value: 'date-validator'
+        },
+
+        ariaLabelPrefix: {
+          type: String
+        },
+
+        /**
+         * Set to true to disable the month and year input elements.
+         */
+        disabled: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Set to true to autofocus the month input element.
+         */
+        autofocus: {
+          type: Boolean
+        },
+
+        /**
+         * Bound to the month and year input elements' `inputmode` property.
+         */
+        inputmode: {
+          type: String
+        },
+
+        /**
+         * Set to true to mark the month and year inputs as not editable.
+         */
+        readonly: {
+          type: Boolean,
+          value: false
+        },
+
+        /**
+         * Overriden from IronA11yKeysBehavior
+         */
+        stopKeyboardEventPropagation: {
+          type: Boolean,
+          value: true
+        },
+
+        /**
+         * Prevents changes to the `date` property
+         */
+        stopDateEventPropagation: {
+          type: Boolean,
+          value: false
+        }
+      },
+
+      keyBindings: {
+        '/': '_focusYear',
+        'shift+tab:keydown': '_onShiftTabDown'
+      },
+
+      observers: [
+        '_valuesChanged(month, year, stopDateEventPropagation, autoValidate)'
+      ],
+
+      beforeRegister: function() {
+        var template = Polymer.DomModule.import('date-input', 'template');
+        var version = Polymer.Element ? 'v1' : 'v0';
+        var inputTemplate = Polymer.DomModule.import('date-input',
+          'template#' + version);
+        var inputPlaceholder = template.content.querySelector(
+          '#template-placeholder');
+        if (inputPlaceholder) {
+          inputPlaceholder.parentNode.replaceChild(inputTemplate.content,
+            inputPlaceholder);
+        }
+      },
+
+      _focusYear: function() {
+        this.$.expirationYear.focus();
+      },
+
+      /**
+       * If needed, sets `month`, `year`, and `date` properties and performs
+       * validation
+       */
+      _setMonthAndYear(month, year, validate) {
+        var oldDate = this.date || {};
+        var monthChanged = month !== oldDate.month;
+        var yearChanged = year !== oldDate.year;
+        if (monthChanged || yearChanged) {
+          var date = {
+            month: month,
+            year: year
+          };
+          if (Polymer.Element) {
+            this.setProperties({
+              "month": month,
+              "year": year,
+              "date": date
+            });
+          } else {
+            this.month = month;
+            this.year = year;
+            this.date = date;
+          }
+          if (validate) {
+            this.validate();
+          }
+        }
+      },
+
+      /**
+       * Handles changes that require `date` computation or validation
+       */
+      _valuesChanged: function(month, year, stopDateEventPropagation,
+          autoValidate) {
+        if (typeof(stopDateEventPropagation) === "undefined"
+            || stopDateEventPropagation) {
+          return;
+        }
+        this._setMonthAndYear(month, year, autoValidate);
+      },
+
+      /**
+       * Handles month input events
+       */
+      _onInputMonth: function(e) {
+        this._onInputMonthOrYear(e);
+        if (this.month && this.month.length === 2) {
+          this._focusYear();
+        }
+      },
+
+      /**
+       * Handles year input events
+       */
+      _onInputYear: function(e) {
+        this._onInputMonthOrYear(e);
+      },
+
+      /**
+       * Handles month or year input events
+       */
+      _onInputMonthOrYear: function(e) {
+        var month = this.$.expirationMonth.value;
+        var year = this.$.expirationYear.value;
+        this._setMonthAndYear(month, year, this.autoValidate);
+      },
+
+      validate: function() {
+        // Empty, non-required input is valid.
+        if (!this.required && this.month == '' && this.year == '') {
+          return true;
+        }
+        this.invalid = !this.$.validator.validate(this.date);
+        this.fire('iron-input-validate');
+        return !this.invalid;
+      },
+
+      _computeAriaLabel: function(dateLabel, monthLabel) {
+        return dateLabel + ' ' + monthLabel;
+      },
+
+      /**
+       * This event was propagating to PaperInputBehavior and causing
+       * tabindex problems
+       *
+       * see https://github.com/PolymerElements/paper-input/blob/master/paper-input-behavior.html#L459
+       */
+      _onShiftTabDown: function(e) {
+        e.stopPropagation();
+      }
+    });
+  </script>
+
 </dom-module>
-
-<script>
-  Polymer({
-
-    is: 'date-input',
-
-    behaviors: [
-      Polymer.IronA11yKeysBehavior,
-      Polymer.IronValidatableBehavior
-    ],
-
-    properties: {
-      /**
-       * Set to true to mark the input as required.
-       */
-      required: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * The month component of the date displayed.
-       */
-      month: {
-        type: String,
-        value: ''
-      },
-
-      /**
-       * The year component of the date displayed.
-       */
-      year: {
-        type: String,
-        value: ''
-      },
-
-      /**
-       * The date object used by the validator. Has two properties, month and year.
-       */
-      date: {
-        notify: true,
-        type: Object
-      },
-
-      validator: {
-        type: String,
-        value: 'date-validator'
-      },
-
-      ariaLabelPrefix: {
-        type:String
-      },
-
-      /**
-       * Set to true to disable the month and year input elements.
-       */
-      disabled: {
-        type: Boolean,
-        value: false
-      },
-
-      /**
-       * Set to true to autofocus the month input element.
-       */
-      autofocus: {
-        type: Boolean
-      },
-
-      /**
-       * Bound to the month and year input elements' `inputmode` property.
-       */
-      inputmode: {
-        type: String
-      },
-
-      /**
-       * Set to true to mark the month and year inputs as not editable.
-       */
-      readonly: {
-        type: Boolean,
-        value: false
-      }
-    },
-
-    keyBindings: {
-      '/': '_selectYear'
-    },
-
-    observers: [
-      '_computeDate(month, year)'
-    ],
-
-    _selectYear: function() {
-      this.$.expirationYear.focus();
-    },
-
-    _computeDate: function(month, year) {
-      // Months are 0-11.
-      this.date = {month: month, year: year};
-      this.fire('dateChanged', this.date);
-      // Advance cursor to year after month entry
-      if (month && month.length === 2) {
-        this._selectYear();
-      }
-    },
-
-    validate: function() {
-      // Empty, non-required input is valid.
-      if (!this.required && this.month == '' && this.year == '') {
-        return true;
-      }
-      this.invalid = !this.$.validator.validate(this.date);
-      this.fire('iron-input-validate');
-      return !this.invalid;
-    },
-
-    _computeAriaLabel: function(dateLabel, monthLabel) {
-      return dateLabel + ' ' + monthLabel;
-    }
-  });
-</script>

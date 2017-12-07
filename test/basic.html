@@ -35,132 +35,186 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </template>
   </test-fixture>
 
+  <test-fixture id="manualValidate">
+    <template>
+      <gold-cc-expiration-input required error-message="error"></gold-cc-expiration-input>
+    </template>
+  </test-fixture>
+
   <script>
 
     suite('basic', function() {
-      test('invalid input is not ok', function() {
+      test('invalid input is not ok', function(done) {
         var input = fixture('basic');
-        input.value='1234';
-        forceXIfStamp(input);
+        Polymer.Base.async(function() {
+          input.value='1234';
+          forceXIfStamp(input);
 
-        var container = Polymer.dom(input.root).querySelector('paper-input-container');
-        assert.ok(container, 'paper-input-container exists');
-        assert.isTrue(container.invalid);
+          var container = Polymer.dom(input.root).querySelector('paper-input-container');
+          assert.ok(container, 'paper-input-container exists');
+          assert.isTrue(container.invalid);
 
-        var error = Polymer.dom(input.root).querySelector('paper-input-error');
-        assert.ok(error, 'paper-input-error exists');
-        assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+
+          done();
+        }, 1);
       });
 
-      test('misformed dates are not ok', function() {
+      test('misformed dates are not ok', function(done) {
         var input = fixture('basic');
-        input.value='33/33';
-        forceXIfStamp(input);
+        Polymer.Base.async(function() {
+          input.value='33/33';
+          forceXIfStamp(input);
 
-        var container = Polymer.dom(input.root).querySelector('paper-input-container');
-        assert.ok(container, 'paper-input-container exists');
-        assert.isTrue(container.invalid);
+          var container = Polymer.dom(input.root).querySelector('paper-input-container');
+          assert.ok(container, 'paper-input-container exists');
+          assert.isTrue(container.invalid);
 
-        var error = Polymer.dom(input.root).querySelector('paper-input-error');
-        assert.ok(error, 'paper-input-error exists');
-        assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+
+          done();
+        }, 1);
       });
 
-      test('past dates are not ok', function() {
+      test('past dates are not ok', function(done) {
         var input = fixture('basic');
-        input.value='11/00';
-        forceXIfStamp(input);
+        Polymer.Base.async(function() {
+          input.value='11/00';
+          forceXIfStamp(input);
 
-        var container = Polymer.dom(input.root).querySelector('paper-input-container');
-        assert.ok(container, 'paper-input-container exists');
-        assert.isTrue(container.invalid);
+          var container = Polymer.dom(input.root).querySelector('paper-input-container');
+          assert.ok(container, 'paper-input-container exists');
+          assert.isTrue(container.invalid);
 
-        var error = Polymer.dom(input.root).querySelector('paper-input-error');
-        assert.ok(error, 'paper-input-error exists');
-        assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+
+          done();
+        }, 1);
       });
 
-      test('future dates are ok', function() {
+      test('future dates are ok', function(done) {
         var input = fixture('basic');
-        // Note: this test will start failing in 2099. Apologies, future maintainers.
-        input.value='11/99';
-        forceXIfStamp(input);
+        Polymer.Base.async(function() {
+          // Note: this test will start failing in 2099. Apologies, future maintainers.
+          input.value='11/99';
+          forceXIfStamp(input);
 
-        var container = Polymer.dom(input.root).querySelector('paper-input-container');
-        assert.ok(container, 'paper-input-container exists');
-        assert.isFalse(container.invalid);
-        assert.equal(input.value, '11/99');
+          var container = Polymer.dom(input.root).querySelector('paper-input-container');
+          assert.ok(container, 'paper-input-container exists');
+          assert.isFalse(container.invalid);
+          assert.equal(input.value, '11/99');
 
-        var error = Polymer.dom(input.root).querySelector('paper-input-error');
-        assert.ok(error, 'paper-input-error exists');
-        assert.equal(getComputedStyle(error).visibility, 'hidden', 'error is visibility:hidden');
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.equal(getComputedStyle(error).visibility, 'hidden', 'error is visibility:hidden');
+
+          done();
+        }, 1);
       });
 
-      test('value is updated correctly ', function() {
+      test('value is updated correctly ', function(done) {
         var input = fixture('basic');
-        input.$$('.paper-input-input').month = 11;
-        input.$$('.paper-input-input').year = 15;
-        assert.equal(input.value, '11/15');
+        Polymer.Base.async(function() {
+          forceXIfStamp(input);
+
+          var dateInput = Polymer.dom(input.root).querySelector('date-input');
+          dateInput.month = 11;
+          dateInput.year = 15;
+          assert.equal(input.value, '11/15');
+
+          done();
+        }, 1);
+      });
+
+      test('empty required input shows error if autovalidating', function(done) {
+        var input = fixture('basic');
+        Polymer.Base.async(function() {
+          forceXIfStamp(input);
+
+          var container = Polymer.dom(input.root).querySelector('paper-input-container');
+          assert.ok(container, 'paper-input-container exists');
+          assert.isTrue(container.invalid);
+
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is visibility:hidden');
+          done();
+        }, 1);
       });
 
       test('empty required input shows error on blur', function(done) {
+        var input = fixture('manualValidate');
+        Polymer.Base.async(function() {
+          forceXIfStamp(input);
+
+          var error = Polymer.dom(input.root).querySelector('paper-input-error');
+          assert.ok(error, 'paper-input-error exists');
+          assert.equal(getComputedStyle(error).visibility, 'hidden', 'error is visibility:hidden');
+          input.addEventListener('blur', function(event) {
+            assert(!input.focused, 'input is blurred');
+            assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+            done();
+          });
+          MockInteractions.focus(input.inputElement);
+          MockInteractions.blur(input.inputElement);
+        }, 1);
+      });
+
+      test('placeholder shows correctly', function(done) {
         var input = fixture('basic');
-        forceXIfStamp(input);
-
-        var error = Polymer.dom(input.root).querySelector('paper-input-error');
-        assert.ok(error, 'paper-input-error exists');
-
-        assert.equal(getComputedStyle(error).visibility, 'hidden', 'error is visibility:hidden');
-
-        input.addEventListener('blur', function(event) {
-          assert(!input.focused, 'input is blurred');
-          assert.notEqual(getComputedStyle(error).visibility, 'hidden', 'error is not visibility:hidden');
+        Polymer.Base.async(function() {
+          forceXIfStamp(input);
+          var dateInput = Polymer.dom(input.root).querySelector('date-input');
+          var month = Polymer.dom(dateInput.root).querySelector('#expirationMonth');
+          var year = Polymer.dom(dateInput.root).querySelector('#expirationYear');
+          assert.equal(month.placeholder, 'MM', 'month placeholder is MM');
+          assert.equal(year.placeholder, 'YY', 'year placeholder is YY');
           done();
-        });
-        MockInteractions.focus(input.inputElement);
-        MockInteractions.blur(input.inputElement);
+        }, 1);
       });
 
-      test('placeholder shows correctly', function() {
+      test('/ key advances to year input', function(done) {
         var input = fixture('basic');
-        forceXIfStamp(input);
-        var dateInput = Polymer.dom(input.root).querySelector('date-input');
-        var month = Polymer.dom(dateInput.root).querySelector('#expirationMonth');
-        var year = Polymer.dom(dateInput.root).querySelector('#expirationYear');
-        assert.equal(month.placeholder, 'MM', 'month placeholder is MM');
-        assert.equal(year.placeholder, 'YY', 'year placeholder is YY');
-      });
-
-      test('/ key advances to year input', function() {
-        var input = fixture('basic');
-        forceXIfStamp(input);
-        var dateInput = Polymer.dom(input.root).querySelector('date-input');
-        var year = Polymer.dom(dateInput.root).querySelector('#expirationYear');
-        MockInteractions.pressAndReleaseKeyOn(dateInput, 191, [], '/');
-        assert.equal(Polymer.dom(dateInput.root).activeElement, year, 'year is focused');
+        Polymer.Base.async(function() {
+          forceXIfStamp(input);
+          var dateInput = Polymer.dom(input.root).querySelector('date-input');
+          var year = Polymer.dom(dateInput.root).querySelector('#expirationYear');
+          MockInteractions.pressAndReleaseKeyOn(dateInput, 191, [], '/');
+          assert.equal(Polymer.dom(dateInput.root).activeElement, year, 'year is focused');
+          done();
+        }, 1);
       });
 
     });
 
     suite('a11y', function() {
 
-      test('has aria-labelledby', function() {
+      test('has aria-labelledby', function(done) {
         var input = fixture('basic');
-        var dateInput = input.$$('.paper-input-input');
-        var month = dateInput.$$('input:nth-of-type(1)');
-        var year = dateInput.$$('input:nth-of-type(2)');
-        var label = Polymer.dom(input.root).querySelector('label').id;
+        Polymer.Base.async(function() {
+          var dateInput = input.$$('.paper-input-input');
+          var dateInput = Polymer.dom(input.root).querySelector('date-input');
+          var month = Polymer.dom(dateInput.root).querySelector('#expirationMonth');
+          var year = Polymer.dom(dateInput.root).querySelector('#expirationYear');
+          var label = Polymer.dom(input.root).querySelector('label').id;
 
-        assert.ok(month);
-        assert.ok(year);
+          assert.ok(month);
+          assert.ok(year);
 
-        assert.isTrue(month.hasAttribute('aria-labelledby'));
-        assert.isTrue(year.hasAttribute('aria-labelledby'));
+          assert.isTrue(month.hasAttribute('aria-labelledby'));
+          assert.isTrue(year.hasAttribute('aria-labelledby'));
 
-        assert.equal(month.getAttribute('aria-labelledby'), label + ' monthLabel');
-        assert.equal(year.getAttribute('aria-labelledby'), label + ' yearLabel');
+          assert.equal(month.getAttribute('aria-labelledby'), label + ' monthLabel');
+          assert.equal(year.getAttribute('aria-labelledby'), label + ' yearLabel');
+          done();
+        }, 1);
       });
-
     });
 
 
